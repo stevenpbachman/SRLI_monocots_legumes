@@ -1,0 +1,168 @@
+"year","group","category","count","dataset","total","percent"
+"2000","Legumes","CR",17,"SRLI 2020",1344,1.26
+"2000","Legumes","DD",79,"SRLI 2020",1344,5.88
+"2000","Legumes","EN",65,"SRLI 2020",1344,4.84
+"2000","Legumes","EW",1,"SRLI 2020",1344,0.07
+"2000","Legumes","LC",728,"SRLI 2020",1344,54.17
+"2000","Legumes","NE",310,"SRLI 2020",1344,23.07
+"2000","Legumes","NT",83,"SRLI 2020",1344,6.18
+"2000","Legumes","VU",61,"SRLI 2020",1344,4.54
+"2000","Monocots","CR",29,"SRLI 2020",1373,2.11
+"2000","Monocots","DD",154,"SRLI 2020",1373,11.22
+"2000","Monocots","EN",99,"SRLI 2020",1373,7.21
+"2000","Monocots","LC",679,"SRLI 2020",1373,49.45
+"2000","Monocots","NE",251,"SRLI 2020",1373,18.28
+"2000","Monocots","NT",60,"SRLI 2020",1373,4.37
+"2000","Monocots","VU",101,"SRLI 2020",1373,7.36
+"2010","Legumes","CR",17,"SRLI 2020",1344,1.26
+"2010","Legumes","DD",79,"SRLI 2020",1344,5.88
+"2010","Legumes","EN",66,"SRLI 2020",1344,4.91
+"2010","Legumes","EW",1,"SRLI 2020",1344,0.07
+"2010","Legumes","LC",726,"SRLI 2020",1344,54.02
+"2010","Legumes","NE",310,"SRLI 2020",1344,23.07
+"2010","Legumes","NT",84,"SRLI 2020",1344,6.25
+"2010","Legumes","VU",61,"SRLI 2020",1344,4.54
+"2010","Monocots","CR",29,"SRLI 2020",1373,2.11
+"2010","Monocots","DD",154,"SRLI 2020",1373,11.22
+"2010","Monocots","EN",100,"SRLI 2020",1373,7.28
+"2010","Monocots","LC",678,"SRLI 2020",1373,49.38
+"2010","Monocots","NE",251,"SRLI 2020",1373,18.28
+"2010","Monocots","NT",60,"SRLI 2020",1373,4.37
+"2010","Monocots","VU",101,"SRLI 2020",1373,7.36
+"2020","Legumes","CR",18,"SRLI 2020",1344,1.34
+"2020","Legumes","DD",79,"SRLI 2020",1344,5.88
+"2020","Legumes","EN",67,"SRLI 2020",1344,4.99
+"2020","Legumes","EW",1,"SRLI 2020",1344,0.07
+"2020","Legumes","LC",725,"SRLI 2020",1344,53.94
+"2020","Legumes","NE",310,"SRLI 2020",1344,23.07
+"2020","Legumes","NT",84,"SRLI 2020",1344,6.25
+"2020","Legumes","VU",60,"SRLI 2020",1344,4.46
+"2020","Monocots","CR",30,"SRLI 2020",1373,2.18
+"2020","Monocots","DD",154,"SRLI 2020",1373,11.22
+"2020","Monocots","EN",100,"SRLI 2020",1373,7.28
+"2020","Monocots","LC",677,"SRLI 2020",1373,49.31
+"2020","Monocots","NE",251,"SRLI 2020",1373,18.28
+"2020","Monocots","NT",59,"SRLI 2020",1373,4.3
+"2020","Monocots","VU",102,"SRLI 2020",1373,7.43
+"2010","Legumes","CR",14,"SRLI 2010",988,1.42
+"2010","Legumes","DD",78,"SRLI 2010",988,7.89
+"2010","Legumes","EN",51,"SRLI 2010",988,5.16
+"2010","Legumes","LC",732,"SRLI 2010",988,74.09
+"2010","Legumes","NT",74,"SRLI 2010",988,7.49
+"2010","Legumes","VU",39,"SRLI 2010",988,3.95
+"2010","Monocots","CR",32,"SRLI 2010",1026,3.12
+"2010","Monocots","DD",124,"SRLI 2010",1026,12.09
+"2010","Monocots","EN",55,"SRLI 2010",1026,5.36
+"2010","Monocots","LC",677,"SRLI 2010",1026,65.98
+"2010","Monocots","NT",67,"SRLI 2010",1026,6.53
+"2010","Monocots","VU",71,"SRLI 2010",1026,6.92
+"2010","Legumes","CR",61,"Red List",791,7.71
+"2010","Legumes","DD",39,"Red List",791,4.93
+"2010","Legumes","EN",159,"Red List",791,20.1
+"2010","Legumes","EW",1,"Red List",791,0.13
+"2010","Legumes","EX",6,"Red List",791,0.76
+"2010","Legumes","LC",32,"Red List",791,4.05
+"2010","Legumes","LR/cd",9,"Red List",791,1.14
+"2010","Legumes","LR/lc",32,"Red List",791,4.05
+"2010","Legumes","LR/nt",66,"Red List",791,8.34
+"2010","Legumes","NT",9,"Red List",791,1.14
+"2010","Legumes","VU",377,"Red List",791,47.66
+"2010","Monocots","CR",162,"Red List",1520,10.66
+"2010","Monocots","DD",187,"Red List",1520,12.3
+"2010","Monocots","EN",289,"Red List",1520,19.01
+"2010","Monocots","EW",2,"Red List",1520,0.13
+"2010","Monocots","EX",2,"Red List",1520,0.13
+"2010","Monocots","LC",291,"Red List",1520,19.14
+"2010","Monocots","LR/cd",17,"Red List",1520,1.12
+"2010","Monocots","LR/lc",29,"Red List",1520,1.91
+"2010","Monocots","LR/nt",45,"Red List",1520,2.96
+"2010","Monocots","NT",86,"Red List",1520,5.66
+"2010","Monocots","VU",410,"Red List",1520,26.97
+"2015","Legumes","CR",89,"Red List",1623,5.48
+"2015","Legumes","DD",122,"Red List",1623,7.52
+"2015","Legumes","EN",185,"Red List",1623,11.4
+"2015","Legumes","EW",1,"Red List",1623,0.06
+"2015","Legumes","EX",3,"Red List",1623,0.18
+"2015","Legumes","LC",733,"Red List",1623,45.16
+"2015","Legumes","LR/cd",8,"Red List",1623,0.49
+"2015","Legumes","LR/lc",20,"Red List",1623,1.23
+"2015","Legumes","LR/nt",40,"Red List",1623,2.46
+"2015","Legumes","NT",96,"Red List",1623,5.91
+"2015","Legumes","VU",326,"Red List",1623,20.09
+"2015","Monocots","CR",352,"Red List",3246,10.84
+"2015","Monocots","DD",347,"Red List",3246,10.69
+"2015","Monocots","EN",534,"Red List",3246,16.45
+"2015","Monocots","EW",2,"Red List",3246,0.06
+"2015","Monocots","EX",2,"Red List",3246,0.06
+"2015","Monocots","LC",1247,"Red List",3246,38.42
+"2015","Monocots","LR/cd",9,"Red List",3246,0.28
+"2015","Monocots","LR/lc",20,"Red List",3246,0.62
+"2015","Monocots","LR/nt",27,"Red List",3246,0.83
+"2015","Monocots","NT",186,"Red List",3246,5.73
+"2015","Monocots","VU",520,"Red List",3246,16.02
+"2020","Legumes","CR",202,"Red List",4347,4.65
+"2020","Legumes","DD",240,"Red List",4347,5.52
+"2020","Legumes","EN",531,"Red List",4347,12.22
+"2020","Legumes","EW",1,"Red List",4347,0.02
+"2020","Legumes","EX",4,"Red List",4347,0.09
+"2020","Legumes","LC",2553,"Red List",4347,58.73
+"2020","Legumes","LR/cd",8,"Red List",4347,0.18
+"2020","Legumes","LR/lc",21,"Red List",4347,0.48
+"2020","Legumes","LR/nt",40,"Red List",4347,0.92
+"2020","Legumes","NT",224,"Red List",4347,5.15
+"2020","Legumes","VU",523,"Red List",4347,12.03
+"2020","Monocots","CR",691,"Red List",8027,8.61
+"2020","Monocots","DD",902,"Red List",8027,11.24
+"2020","Monocots","EN",1270,"Red List",8027,15.82
+"2020","Monocots","EW",8,"Red List",8027,0.1
+"2020","Monocots","EX",13,"Red List",8027,0.16
+"2020","Monocots","LC",3633,"Red List",8027,45.26
+"2020","Monocots","LR/cd",9,"Red List",8027,0.11
+"2020","Monocots","LR/lc",20,"Red List",8027,0.25
+"2020","Monocots","LR/nt",27,"Red List",8027,0.34
+"2020","Monocots","NT",428,"Red List",8027,5.33
+"2020","Monocots","VU",1026,"Red List",8027,12.78
+"2024","Legumes","CR",306,"Red List",6259,4.89
+"2024","Legumes","DD",413,"Red List",6259,6.6
+"2024","Legumes","EN",840,"Red List",6259,13.42
+"2024","Legumes","EW",3,"Red List",6259,0.05
+"2024","Legumes","EX",5,"Red List",6259,0.08
+"2024","Legumes","LC",3606,"Red List",6259,57.61
+"2024","Legumes","LR/cd",7,"Red List",6259,0.11
+"2024","Legumes","LR/lc",3,"Red List",6259,0.05
+"2024","Legumes","LR/nt",17,"Red List",6259,0.27
+"2024","Legumes","NT",358,"Red List",6259,5.72
+"2024","Legumes","VU",701,"Red List",6259,11.2
+"2024","Monocots","CR",914,"Red List",9650,9.47
+"2024","Monocots","DD",1072,"Red List",9650,11.11
+"2024","Monocots","EN",1579,"Red List",9650,16.36
+"2024","Monocots","EW",7,"Red List",9650,0.07
+"2024","Monocots","EX",15,"Red List",9650,0.16
+"2024","Monocots","LC",4283,"Red List",9650,44.38
+"2024","Monocots","LR/cd",7,"Red List",9650,0.07
+"2024","Monocots","LR/lc",13,"Red List",9650,0.13
+"2024","Monocots","LR/nt",19,"Red List",9650,0.2
+"2024","Monocots","NT",546,"Red List",9650,5.66
+"2024","Monocots","VU",1195,"Red List",9650,12.38
+"2024","Legumes","CR",7140,"RL_2024+preds",22128,32.27
+"2024","Legumes","DD",331,"RL_2024+preds",22128,1.5
+"2024","Legumes","EN",715,"RL_2024+preds",22128,3.23
+"2024","Legumes","EW",1,"RL_2024+preds",22128,0
+"2024","Legumes","EX",2,"RL_2024+preds",22128,0.01
+"2024","Legumes","LC",12960,"RL_2024+preds",22128,58.57
+"2024","Legumes","LR/cd",8,"RL_2024+preds",22128,0.04
+"2024","Legumes","LR/lc",11,"RL_2024+preds",22128,0.05
+"2024","Legumes","LR/nt",27,"RL_2024+preds",22128,0.12
+"2024","Legumes","NT",301,"RL_2024+preds",22128,1.36
+"2024","Legumes","VU",632,"RL_2024+preds",22128,2.86
+"2024","Monocots","CR",40463,"RL_2024+preds",77854,51.97
+"2024","Monocots","DD",932,"RL_2024+preds",77854,1.2
+"2024","Monocots","EN",1407,"RL_2024+preds",77854,1.81
+"2024","Monocots","EW",2,"RL_2024+preds",77854,0
+"2024","Monocots","EX",6,"RL_2024+preds",77854,0.01
+"2024","Monocots","LC",33440,"RL_2024+preds",77854,42.95
+"2024","Monocots","LR/cd",7,"RL_2024+preds",77854,0.01
+"2024","Monocots","LR/lc",18,"RL_2024+preds",77854,0.02
+"2024","Monocots","LR/nt",20,"RL_2024+preds",77854,0.03
+"2024","Monocots","NT",474,"RL_2024+preds",77854,0.61
+"2024","Monocots","VU",1085,"RL_2024+preds",77854,1.39
