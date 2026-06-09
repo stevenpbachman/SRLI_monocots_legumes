@@ -23,11 +23,11 @@ library(ggthemes)
 # start from scratch so that this is standalone
 work_dir = "C:/Users/sb42kg/OneDrive - The Royal Botanic Gardens, Kew/01_Projects/SRLI_project/SRLI_2_paper/SRLI_2024_C_version/"
 
-#########
-#########
+# load relevant files
+SRLI_2026 <- read_csv(paste0(work_dir, "00_raw_data/SRLI_2026.csv")) %>%
+  dplyr::filter(SRLI_2024_analysis == "include")
+
 # use the data from part 1. to feed part 2
-#########
-#########
 
 # 1. Basic stats on number of AOH maps ----
 # GBIF workflow ----
@@ -44,17 +44,8 @@ gbif_aoh_read_in = purrr::map_df(aoh_files_gbif, read_csv, show_col_types = FALS
 # save combined file for later
 aoh_gbif <- data.frame(powoID = unique(gbif_aoh_read_in$powoID), aoh_GBIF_stats = "Yes")
 
-# now get the errors
-# total number of AOH map errors
-aoh_errors_gbif <- list.files(path=paste0(work_dir,"04_outputs/gbif_workflow/errors/"),
-                              pattern="csv",
-                              all.files=FALSE,
-                              full.names=TRUE,
-                              recursive=TRUE)
-
-# read in the AOH error files
-gbif_errors_read_in = purrr::map_df(aoh_errors_gbif, read_csv, show_col_types = FALSE)
-
+#test_dups <- aoh_gbif %>% group_by(powoID) %>% count()
+print(paste0("AOH result 1: ", nrow(aoh_gbif), " GBIF AOH maps"))
 
 # curated workflow ----
 # total number of AOH maps
@@ -71,55 +62,52 @@ curated_aoh_read_in = purrr::map_df(aoh_files_curated, read_csv, show_col_types 
 # save combined file for later
 aoh_curated <- data.frame(powoID = unique(curated_aoh_read_in$powoID), aoh_curated_stats = "Yes")
 
-# now get the errors
-# total number of AOH map errors
-aoh_errors_curated <- list.files(path=paste0(work_dir,"04_outputs/curated_workflow/errors/"),
-                                 pattern="csv",
-                                 all.files=FALSE,
-                                 full.names=TRUE,
-                                 recursive=TRUE)
-
-# read in the AOH error files
-curated_aoh_read_in = purrr::map_df(aoh_errors_curated, read_csv, show_col_types = FALSE) %>%
-  dplyr::mutate(source = "curated")
+test_dups <- aoh_curated %>% group_by(powoID) %>% count()
+print(paste0("AOH result 1: ", nrow(aoh_curated), " curated AOH maps"))
 
 # join them together and summarise
 aoh_comb <- aoh_gbif %>% left_join(aoh_curated, by = 'powoID')
 
-# extra analysis - check RSFD of species used in te
+# go long to get total number of aoh maps
+aoh_comb_long <- bind_rows(aoh_gbif, aoh_curated)
+print(paste0("AOH result 2: ", nrow(aoh_comb_long), " AOH maps"))
+
+# join to get counts per groups
+comb_long <- aoh_comb_long %>% left_join(SRLI_2026,
+                                            by = c("powoID" = "WCVP_current_id")) %>%
+  select(group, powoID)
+
+count_groups <- comb_long %>%
+  group_by(group) %>% count()
+
+
+# how many species in both
+print(paste0("AOH result 3: ",
+             sum(aoh_comb$aoh_GBIF_stats == "Yes" &
+                   aoh_comb$aoh_curated_stats == "Yes",
+                 na.rm = TRUE),
+             " both GBIF and curated AOH maps"))
 
 
 # 2. GBIF vs curated validation ----
 
-# i curated aoh results
-files_curated <- list.files(path=paste0(work_dir,"/04_outputs/curated_workflow/aoh_stats"),
-                        pattern="csv",
-                        all.files=FALSE,
-                        full.names=TRUE,
-                        recursive=TRUE)
-
-# read in the curated results files - takes a while
-curated_read_in <- map_df(files_curated, read_csv, show_col_types = FALSE)
-
-curated_2020 <- curated_read_in %>% filter(year == "year_2020") %>%
+curated_2020 <- curated_aoh_read_in %>% filter(year == "year_2020") %>%
   select(cell_count, powoID) %>%
   mutate(workflow = "curated")
 
-# ii GBIF aoh results
-files_GBIF <- list.files(path=paste0(work_dir,"/04_outputs/gbif_workflow/aoh_stats"),
-                            pattern="csv",
-                            all.files=FALSE,
-                            full.names=TRUE,
-                            recursive=TRUE)
-
-# read in the curated results files - takes a while
-GBIF_read_in <- map_df(files_GBIF, read_csv, show_col_types = FALSE)
-
-GBIF_2020 <- GBIF_read_in %>% filter(year == "year_2020") %>%
+GBIF_2020 <- gbif_aoh_read_in %>% filter(year == "year_2020") %>%
   select(cell_count, powoID) %>%
   mutate(workflow = "gbif")
 
 comb_2020 <- bind_rows(curated_2020, GBIF_2020)
+
+# join to get counts per groups
+comb_2020_groups <- comb_2020 %>% left_join(SRLI_2026,
+                                            by = c("powoID" = "WCVP_current_id")) %>%
+select(group, cell_count, powoID, workflow)
+
+count_groups <- comb_2020_groups %>%
+  group_by(group) %>% count()
 
 # Keep only powoIDs that have both 'curated' and 'gbif'
 comb_2020 <- comb_2020 %>%
@@ -144,14 +132,20 @@ mean(log(wide_df$gbif) - log(wide_df$curated))
 exp(mean(log(wide_df$gbif) - log(wide_df$curated)))
 
 # density
-ggplot(comb_2020, aes(x = cell_count, fill = workflow)) +
+p_dens <- ggplot(comb_2020, aes(x = cell_count, fill = workflow)) +
   geom_density(alpha = 0.5) +
   scale_x_log10(labels = scales::comma) +
   labs(x = "Range Size (cells)", y = "Density") +
-  theme_classic()
+  theme_base(base_size = 14) +
+  theme(
+    legend.background = element_blank(),
+    legend.box.background = element_blank(),
+    plot.background = element_blank(),
+    panel.background = element_rect(fill = "white", colour = NA)
+  )
 
 # hex
-ggplot(wide_df, aes(x = curated, y = gbif)) +
+p_hex <- ggplot(wide_df, aes(x = curated, y = gbif)) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed",
               color = "red", linewidth = 0.8) +
   geom_hex(bins = 30, alpha = 0.7) +
@@ -170,4 +164,7 @@ ggplot(wide_df, aes(x = curated, y = gbif)) +
 coord_equal()
 getwd()
 
-ggsave(paste0(getwd(),"/02_figures/Figure_S3_GBIF_vs_Curated.png"), width = 6, height = 5)
+(p_hex / p_dens)
+#ggsave(paste0(getwd(),"/02_figures/Figure_S3_GBIF_vs_Curated.png"), width = 6, height = 5)
+ggsave(paste0(getwd(),"/02_figures/Figure_S3_GBIF_vs_Curated.png"), width = 6, height = 10)
+

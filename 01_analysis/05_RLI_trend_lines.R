@@ -74,7 +74,7 @@ rli_boot <- function(data_sufficient_counts, boot = FALSE, year, group, dd_speci
 }
 
 # load relevant files
-SRLI_2024 <- read_csv(paste0(work_dir,"00_raw_data/SRLI_2024.csv"))
+SRLI_2024 <- read_csv(paste0(work_dir,"00_raw_data/SRLI_2026.csv"))
 RLI_stat <- SRLI_2024 %>% filter(SRLI_2024_analysis == "include") # only the included species
 
 # split by monocot and legumes
@@ -143,7 +143,7 @@ result <- Table_S6_rli_values %>%
 
 result %>%
   mutate(
-    perc = paste0(round(weighted_diff, 2), "%")       # keep 2 decimal
+    perc = paste0(round(diff, 2), "%")       # keep 2 decimal
   )
 
 #Result 6. ----
