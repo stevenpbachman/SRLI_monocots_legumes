@@ -74,7 +74,7 @@ SRLI_2026 %>% group_by(group, SRLI_2024_analysis) %>% count()
 alluvial_data <- SRLI_2026 %>% select(group, SRLI_2024_analysis,
                                      SRLI_2020_final_cat, aoh_map,
                                      AOH_map_valid, WCVP_current_id, final_workflow) %>%
-  dplyr::filter(SRLI_2024_analysis != "exclude_extra")
+  dplyr::filter(SRLI_2024_analysis == "include")
 
 alluvial_data$original <- TRUE
 
@@ -111,16 +111,28 @@ legs_sank <- alluvial_data %>% filter(group == "Legumes")
 # summary tables for supplementary
 comb <- bind_rows(mono_sank,legs_sank)
 
-data_coverage_summary <-
-  summary_table <- comb %>%
+# data_coverage_summary <-
+#   summary_table <- comb %>%
+#   group_by(group) %>%
+#   summarise(
+#     across(
+#       where(is.logical),
+#       ~ sum(.x, na.rm = TRUE),
+#       .names = "{.col}"
+#     )
+#   )
+
+data_coverage_summary <- comb %>%
   group_by(group) %>%
   summarise(
     across(
       where(is.logical),
-      ~ sum(.x, na.rm = TRUE),
-      .names = "{.col}"
-    )
+      ~ sum(.x, na.rm = TRUE)
+    ),
+    curated = sum(final_workflow == "curated", na.rm = TRUE),
+    GBIF    = sum(final_workflow == "GBIF", na.rm = TRUE)
   )
+
 
 # write this table to results and merge as a single excel file in sup mat
 write.csv(data_coverage_summary,

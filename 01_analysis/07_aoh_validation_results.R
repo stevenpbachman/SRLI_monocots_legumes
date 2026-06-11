@@ -104,6 +104,43 @@ val_summary <- comb_val %>%
     .groups = "drop"
   )
 
+# Table S8 ----
+# make a table with the proportions (summary) - sup mat
+comb_val$diff <- comb_val$meanPointsprev - comb_val$meanAOHprev
+
+grouped_summary <- comb_val %>%
+  group_by(group, method, source) %>%
+  summarise(proportion_TRUE = mean(valid_test == TRUE),
+            mean_accuracy = mean(diff, na.rm = TRUE),
+            sd_accuracy = sd(diff, na.rm = TRUE),
+            count = n())
+
+# Summary without group (just method and source)
+method_source_summary <- comb_val %>%
+  group_by(method, source) %>%
+  summarise(proportion_TRUE = mean(valid_test == TRUE),
+            mean_accuracy = mean(diff, na.rm = TRUE),
+            sd_accuracy = sd(diff, na.rm = TRUE),
+            count = n(),
+            group = "All") # Add a placeholder for group
+
+# Summary without group (just method )
+method_summary <- comb_val %>%
+  group_by(method) %>%
+  summarise(proportion_TRUE = mean(valid_test == TRUE),
+            mean_accuracy = mean(diff, na.rm = TRUE),
+            sd_accuracy = sd(diff, na.rm = TRUE),
+            count = n(),
+            group = "All") # Add a placeholder for group
+
+Table_S8_validation_summary <- bind_rows(grouped_summary,
+                                             method_source_summary,
+                                             method_summary)
+# write down the table
+write.csv(Table_S8_validation_summary,
+          "02_figures/Table_S8_validation_summary.csv",
+          row.names = FALSE)
+
 # Plot proportions directly
 buffer_comparison <- ggplot(val_summary, aes(x = method, y = success_rate, fill = source)) +
   geom_col(position = position_dodge(width = 0.8), width = 0.7, color = "grey30") +
@@ -143,6 +180,14 @@ ggsave("02_figures/Figure_4_A.png", width = 10, height = 4)
 # now get the accuracy values from comb_val
 comb_val$diff <- comb_val$meanPointsprev - comb_val$meanAOHprev
 
+# Table S7 ----
+# save table 7
+write.csv(comb_val,
+          "02_figures/Table_S7_validation_tests.csv",
+          row.names = FALSE)
+
+
+# Table S9 ----
 acc <- comb_val %>%
   group_by(group, method, source) %>%
   summarise(
@@ -151,6 +196,11 @@ acc <- comb_val %>%
     iqr_accuracy = IQR(diff),
     .groups = "drop"
   )
+
+# save table 9
+write.csv(acc,
+          "02_figures/Table_S9_validation_accuracy.csv",
+          row.names = FALSE)
 
 acc_box <- ggplot(comb_val, aes(x = method, y = diff, fill = source)) +
   geom_boxplot(outlier.shape = 21, alpha = 0.9) +
@@ -288,49 +338,10 @@ combined_errors <- bind_rows(curated_aoh_read_in, gbif_errors_read_in)
 
 sum_error_reasons <- combined_errors %>% group_by(error) %>% count()
 
-# Table S7 ----
-# make a table with the proportions - sup mat
-comb_val$diff <- comb_val$meanPointsprev - comb_val$meanAOHprev
-
-grouped_summary <- comb_val %>%
-  group_by(group, method, source) %>%
-  summarise(proportion_TRUE = mean(valid_test == TRUE),
-            mean_accuracy = mean(diff, na.rm = TRUE),
-            sd_accuracy = sd(diff, na.rm = TRUE),
-            count = n())
-
-# Summary without group (just method and source)
-method_source_summary <- comb_val %>%
-  group_by(method, source) %>%
-  summarise(proportion_TRUE = mean(valid_test == TRUE),
-            mean_accuracy = mean(diff, na.rm = TRUE),
-            sd_accuracy = sd(diff, na.rm = TRUE),
-            count = n(),
-            group = "All") # Add a placeholder for group
-
-# Summary without group (just method )
-method_summary <- comb_val %>%
-  group_by(method) %>%
-  summarise(proportion_TRUE = mean(valid_test == TRUE),
-            mean_accuracy = mean(diff, na.rm = TRUE),
-            sd_accuracy = sd(diff, na.rm = TRUE),
-            count = n(),
-            group = "All") # Add a placeholder for group
-
-# Combine them
-Table_S7_validation_proportions <- bind_rows(grouped_summary,
-                                             method_source_summary,
-                                             method_summary)
-
-
-write.csv(Table_S7_validation_proportions,
-          "02_figures/Table_S7_validation_proportions.csv",
-          row.names = FALSE)
-
 
 # supplementary validation figures
 
-# Figure S5 validation combo ----
+# Figure S4 validation combo ----
 # facet wrap version to compare different buffers
 
 # 1 GBIF legumes
@@ -467,4 +478,64 @@ combo <- plot_grid(gbif_val_mons_comparison, gbif_val_legs_comparison,
 
 ggsave("02_figures/Figure_S4_validation_combo.png", width = 14, height = 15)
 
+# Figure S5 ----
+# map and point prevalence plot
+combo_1km_prev <- combo_1km# %>% filter(source == "Curated")
 
+df_long <- combo_1km_prev %>%
+  select(-method) %>%  # Remove the existing method column
+  pivot_longer(
+    cols = c(meanAOHprev, meanPointsprev),
+    names_to = "method",
+    values_to = "prevalence"
+  ) %>%
+  mutate(method = recode(method,
+                         "meanAOHprev" = "AOH prevalence",
+                         "meanPointsprev" = "Points prevalence"))
+
+ggplot(df_long, aes(x = prevalence, fill = source)) +
+  geom_histogram(
+    bins = 30,
+    position = "identity",
+    alpha = 0.9,
+    color = "grey30"  # subtle outline for contrast
+  ) +
+  facet_wrap(~method + source, ncol = 2) +
+  scale_fill_manual(
+    values = c("Curated" = "#CC79A7", "GBIF" = "#509E2F")
+  ) +
+  labs(
+    x = "Mean Prevalence",
+    y = "Number of Species",
+    fill = "Source"
+  ) +
+  theme_base(base_size = 14) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_text(size = 11),
+    legend.text = element_text(size = 10),
+    legend.background = element_blank(),
+    plot.background = element_blank(),
+    panel.background = element_rect(fill = "white", colour = NA),
+    strip.background = element_rect(fill = NA, colour = "grey70"),
+    strip.text = element_text(size = 13, face = "bold")
+  )
+
+ggsave(("02_figures/Figure_S5_aoh_point_prev.png"),width = 10, height = 6)
+
+
+# final text
+# no. species with valid AOH maps ----
+
+# get full list of species availble for the validation
+# filter on the 1km tests
+# valid test true
+
+final_maps <- comb_val %>% dplyr::filter(method == "1km",
+                                         valid_test == "TRUE") %>%
+  arrange(sp_id, desc(source == "Curated")) %>%
+  distinct(sp_id, .keep_all = TRUE)
+
+tots <- final_maps %>% group_by(group,source) %>% count()
+
+print(tots)

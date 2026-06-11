@@ -189,7 +189,7 @@ RLI_simple <- RLI_simple +
   theme(legend.position = "none")
 
 # save it
-ggsave("02_figures/Figure_3_RLI_simple.png", width = 4.5, height = 6)
+#ggsave("02_figures/Figure_3_RLI_simple.png", width = 4.5, height = 6)
 
 # Make this part B of figure 2.
 # now add in birds, mammals aggregated

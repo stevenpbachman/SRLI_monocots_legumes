@@ -14,8 +14,8 @@ source("01_analysis/03_threat_proportion.R") # Figure 1, Tables S2,S3
 source("01_analysis/04_category_changes.R") # Table 1, Figure 2 (A,B,C,D), Tables S4,S5
 source("01_analysis/05_RLI_trend_lines.R") #Figure 3, Tables S6
 source("01_analysis/06_compare_curated_gbif_aoh.R") #Figure S3
-source("01_analysis/07_aoh_validation_results.R") #Figure 4, Table_S7, Figure S4
-
+source("01_analysis/07_aoh_validation_results.R") #Figure 4, Table_S7, Figure S4. Figure S5
+source("01_analysis/09_representativeness.R") #Figure S6
 
 # generate the supplementary tables - excel
 data_coverage_summary <- read.csv("02_figures/Table_S1_data_coverage_summary.csv")
@@ -25,7 +25,9 @@ change_summary <- read.csv("02_figures/change_summary.csv")
 genuine_threat_reasons <- read.csv("02_figures/Table_S4_genuine_threat_reasons.csv")
 non_genuine_raw_counts <- read.csv("02_figures/Table_S5_non_genuine_raw_counts.csv")
 RLI_values <- read.csv("02_figures/Table_S6_rli_values.csv")
-Validation_proportions <- read.csv("02_figures/Table_S7_validation_proportions.csv")
+validation_tests <- read.csv("02_figures/Table_S7_validation_tests.csv")
+validation_summary <- read.csv("02_figures/Table_S8_validation_summary.csv")
+validation_accuracy <- read.csv("02_figures/Table_S9_validation_accuracy.csv")
 
 # write as an excel file with tabs for each table
 write_xlsx(
@@ -35,6 +37,8 @@ write_xlsx(
   "S4_genuine_threat_reasons" = genuine_threat_reasons,
   "S5_non_genuine_raw_counts.csv" = non_genuine_raw_counts,
   "S6_RLI_values.csv" = RLI_values,
-  "S7_Validation_proportions.csv" = Validation_proportions
+  "S7_validation_tests" = validation_tests,
+  "S8_validation_summary" = validation_summary,
+  "S9_validation_accuracy.csv" = validation_accuracy
   ),
   "02_figures/Supplementary_tables.xlsx")
