@@ -450,8 +450,8 @@ pad <- 0.1
 mon_transitions_bordered <- add_border(mon_transitions, "#0072B2")
 leg_transitions_bordered <- add_border(leg_transitions, "#E69F00")
 
-leg_icon <- recolour_svg("02_figures/PhyloPic_Legume.svg", "#E69F00")
-mon_icon <- recolour_svg("02_figures/PhyloPic_Anomochloa_marantoidea.svg", "#0072B2")
+leg_icon <- recolour_svg(svg_path = paste0(work_dir,"02_figures/PhyloPic_Legume.svg"), colour = "#E69F00")
+mon_icon <- recolour_svg(svg_path = paste0(work_dir,"02_figures/PhyloPic_Anomochloa_marantoidea.svg"), colour =  "#0072B2")
 
 mon_transitions_final <- ggdraw() +
   draw_plot(mon_transitions_bordered, x = pad, y = pad, width = 1 - pad, height = 1 - 2*pad) +

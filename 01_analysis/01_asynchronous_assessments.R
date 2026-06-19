@@ -59,7 +59,7 @@ ggplot(year_counts, aes(x = year, y = n, fill = group)) +
   ) +
   scale_x_continuous(labels = as.character(year_counts$year), breaks = year_counts$year) +
   ylab("Number of assessments") +
-  xlab("Year assessment") +
+  xlab("Assessment year") +
   theme_base(base_size = 14) +
   theme(
     legend.position = c(0.85, 0.85),

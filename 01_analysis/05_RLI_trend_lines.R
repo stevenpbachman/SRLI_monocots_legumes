@@ -3,6 +3,13 @@
 
 # Figure 3 - Red List Index
 
+library(readr)
+library(dplyr)
+library(glue)
+library(tidyr)
+library(ggplot2)
+library(ggthemes)
+
 # set up working directory
 #work_dir = "G:/Users/sb42kg/SRLI_2024/"
 work_dir = "C:/Users/sb42kg/OneDrive - The Royal Botanic Gardens, Kew/01_Projects/SRLI_project/SRLI_2_paper/SRLI_2024_C_version/"
@@ -107,7 +114,13 @@ rli_all <- bind_rows(rli_boot_m2000, rli_boot_m2010, rli_boot_m2020,
 
 # Table S3 - RLI values tabular----
 # save down the table so we can add to sup mat
-Table_S6_rli_values <- rli_all
+
+# now add in birds, mammals aggregated
+RLI_others <- read_csv(paste0(work_dir,"00_raw_data/global_aggregated_RLI.csv")) #data to make the RLI plots for other groups
+
+RLI_comb <- bind_rows(RLI_others, rli_all)
+
+Table_S6_rli_values <- RLI_comb
 
 write.csv(Table_S6_rli_values,
           "02_figures/Table_S6_rli_values.csv",
@@ -150,6 +163,53 @@ result %>%
 result %>%
   glue_data("Result 6
             {Group} fraction of species changing one category: {round((frac * 100),2)}%")
+
+
+# # spanish_RLI <- data.frame(Group = c("Spain", "Spain"),
+# #                           Year = as.numeric(c("2000", "2010")),
+# #                           RLI = as.numeric(c("0.93", "0.92")))
+#
+# result <- spanish_RLI %>%
+#   filter(Year %in% c(2000, 2010)) %>%              # only 2000 and 2020
+#   select(Group, Year, RLI) %>%
+#   pivot_wider(names_from = Year, values_from = RLI) %>%  # wide format
+#   mutate(
+#     diff = abs(`2010` - `2000`),                        # difference
+#     frac = diff / 0.2   # divide by 0.2
+#   )
+#
+# result %>%
+#   glue_data("Result 8
+#             {Group} fraction of spanish aggreagated RLI species changing one category: {round((frac * 100),2)}%")
+
+
+# combine the SRLI with RLI gorups
+RLI_groups <- read_csv(paste0(work_dir,"00_raw_data/RLI_values_by_group.csv")) #data to make the RLI plots for other groups
+
+RLI_groups_comb <- bind_rows(Table_S6_rli_values, RLI_groups) %>%
+  select(-c("ci_lower", "ci_upper"))
+
+# RLI groups
+result <- RLI_groups_comb %>%
+  group_by(Group) %>%
+  summarise(
+    year_start = min(Year),
+    year_end = max(Year),
+    rli_start = RLI[which.min(Year)],
+    rli_end = RLI[which.max(Year)],
+    n_years = year_end - year_start,
+    diff = abs(rli_end - rli_start),
+    frac_total = diff / 0.2,                  # equivalent category change over whole period
+    frac_per_year = frac_total / n_years,      # annualised
+    frac_per_decade = frac_per_year * 10        # standardised per-decade rate
+  ) %>%
+  ungroup()
+
+result %>%
+  glue_data("Result 8
+             fraction of {Group} species changing one category: {round((frac_per_decade * 100),2)}%")
+
+
 
 # for the h line - baseline value
 y_int_m <- as.numeric(rli_all %>% filter(Year == 2000,
@@ -194,6 +254,7 @@ RLI_simple <- RLI_simple +
 # Make this part B of figure 2.
 # now add in birds, mammals aggregated
 RLI_others <- read_csv(paste0(work_dir,"00_raw_data/global_aggregated_RLI.csv")) #data to make the RLI plots for other groups
+RLI_groups <- read_csv(paste0(work_dir,"00_raw_data/RLI_values_by_group.csv")) #data to make the RLI plots for other groups
 
 RLI_comb <- bind_rows(RLI_others, rli_all)
 

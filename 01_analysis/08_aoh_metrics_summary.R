@@ -20,162 +20,7 @@ library(stringr)
 library(purrr)
 library(rCAT)
 
-# Summary of AOH changes to identify genuine changes
-
-# organise data
-# start from scratch so that this is standalone
-work_dir = "C:/Users/sb42kg/OneDrive - The Royal Botanic Gardens, Kew/01_Projects/SRLI_project/SRLI_2_paper/SRLI_2024_C_version/"
-
-# load relevant files
-SRLI_2026 <- read_csv(paste0(work_dir, "00_raw_data/SRLI_2026.csv")) %>%
-  dplyr::filter(SRLI_2024_analysis == "include")
-
-# load functions below #results summary etc.
-# single to test it is working
-powo_ID = "469774-1"
-sp_res <- read_csv(paste0(work_dir,"04_outputs/curated_workflow/aoh_stats/results_", powo_ID ,".csv"))
-sp_res <- read_csv(paste0(work_dir,"/04_outputs/gbif_workflow/aoh_stats/results_", powo_ID ,".csv"))
-
-# batch generate results
-# Read in the AOH results
-# GBIF first ----
-files <- list.files(path = paste0(work_dir, "04_outputs/gbif_workflow/aoh_stats/"),
-                    pattern="csv",
-                    all.files=FALSE,
-                    full.names=TRUE,
-                    recursive=TRUE)
-thefile = str_match(files, "results_(.*?).csv")
-results = thefile[,2]
-length(results)
-
-to_do <- results
-
-i = 1
-sp_res <- read_csv(paste0(work_dir,"04_outputs/gbif_workflow/aoh_stats/results_", to_do[i] ,".csv"))
-res = results_summary(sp_res)
-
-for (i in 2:length(to_do)){
-
-  sp_res <- read_csv(paste0(work_dir,"04_outputs/gbif_workflow/aoh_stats/results_", to_do[i] ,".csv"),
-                     col_types = cols()) # to suppress warnings
-  print(sp_res$powoID[i])
-  res_l = try(results_summary(sp_res)) #silent=TRUE
-  res = bind_rows(res, res_l)
-
-}
-
-# save
-gbif_res_all <- res
-#write_csv(gbif_res_all, paste0("04_outputs/all_gbif_possible_genuine_changes.csv"))
-
-# work out only the genuine possible changes i.e. LC, NT cancelled out by VU
-
-# filter to get the possible changes
-res_comb_gbif <- res %>%
-  dplyr::filter(gen_aoh_2000_2010_10yr == TRUE |
-                  gen_aoh_2010_2020_10yr == TRUE |
-                  gen_aoh_2000_2010_20yr == TRUE |
-                  gen_aoh_2010_2020_20yr == TRUE |
-                  gen_aoh_2000_2010_30yr == TRUE |
-                  gen_aoh_2010_2020_30yr == TRUE |
-                  gen_aoo_max_2000_2010== TRUE |
-                  gen_aoo_max_2010_2020 == TRUE |
-                  gen_eoo_max_2000_2010 == TRUE |
-                  gen_eoo_max_2010_2020 == TRUE
-                ) %>%
-  mutate(workflow = "gbif")
-
-
-# batch generate results
-# Read in the AOH results
-# Curated second ----
-files <- list.files(path = paste0(work_dir, "04_outputs/curated_workflow/aoh_stats/"),
-                    pattern="csv",
-                    all.files=FALSE,
-                    full.names=TRUE,
-                    recursive=TRUE)
-thefile = str_match(files, "results_(.*?).csv")
-results = thefile[,2]
-length(results)
-
-to_do <- results
-
-i = 1
-sp_res <- read_csv(paste0(work_dir,"04_outputs/curated_workflow/aoh_stats/results_", to_do[i] ,".csv"))
-res = results_summary(sp_res)
-
-for (i in 2:length(to_do)){
-
-  sp_res <- read_csv(paste0(work_dir,"04_outputs/curated_workflow/aoh_stats/results_", to_do[i] ,".csv"),
-                     col_types = cols()) # to suppress warnings
-  print(sp_res$powoID[i])
-  res_l = try(results_summary(sp_res)) #silent=TRUE
-  res = bind_rows(res, res_l)
-
-}
-
-# save
-curated_res_all <- res
-
-# work out only the genuine possible changes i.e. LC, NT cancelled out by VU
-
-# filter to get the possible changes
-res_comb_curated <- res %>%
-  dplyr::filter(gen_aoh_2000_2010_10yr == TRUE |
-                  gen_aoh_2010_2020_10yr == TRUE |
-                  gen_aoh_2000_2010_20yr == TRUE |
-                  gen_aoh_2010_2020_20yr == TRUE |
-                  gen_aoh_2000_2010_30yr == TRUE |
-                  gen_aoh_2010_2020_30yr == TRUE |
-                  gen_aoo_max_2000_2010== TRUE |
-                  gen_aoo_max_2010_2020 == TRUE |
-                  gen_eoo_max_2000_2010 == TRUE |
-                  gen_eoo_max_2010_2020 == TRUE
-                ) %>%
-  mutate(workflow = "curated")
-
-
-# summarise/combine  results
-res_comb <- bind_rows(res_comb_gbif, res_comb_curated)
-
-res_comb_true <- res_comb %>% dplyr::select("gen_eoo_max_2000_2010",
-                                            "gen_eoo_max_2010_2020",
-                                            "gen_aoo_max_2000_2010",
-                                            "gen_aoo_max_2010_2020",
-                                            "gen_aoh_2000_2010_30yr",
-                                            "gen_aoh_2010_2020_30yr",
-                                            "gen_aoh_2000_2010_20yr",
-                                            "gen_aoh_2010_2020_20yr",
-                                            "gen_aoh_2000_2010_10yr",
-                                            "gen_aoh_2010_2020_10yr"
-)
-
-
-
-# save as a table?
-# Summarise ----
-sum_res <- data.frame(
-  column = names(res_comb_true),
-  n_true = colSums(res_comb_true, na.rm = TRUE)
-)
-
-# how many species?
-res_comb_sp <- res_comb %>% group_by() %>% distinct(powo_ID) %>% count()
-
-# # join with SRLI to get 2020_ratings
-# SRLI_2024_thin <- SRLI_2024 %>% select(WCVP_current_id, RL_2000, RL_2010, RL_2020, WCVP_accepted_name)
-# res_comb_id <- res_comb %>% left_join(SRLI_2024_thin, by = c("powo_ID" = "WCVP_current_id"))
-# test <- res_comb_id %>% group_by(powo_ID) %>% count()
-# write_csv(res_comb_id, paste0("G:/Users/sb42kg/SRLI_2024/04_outputs/possible_genuine_changes_curated.csv"))
-# write_csv(res_comb_id, paste0("G:/Users/sb42kg/SRLI_2024/04_outputs/possible_genuine_changes_gbif.csv"))
-# #write_csv(res_comb_id, paste0("G:/Users/sb42kg/SRLI_2024/04_outputs/possible_genuine_changes.csv"))
-
-
-
-
-
-
-#### functions ####
+### functions ####
 results_summary <- function(sp_res){
 
   powo_ID <- sp_res$powoID[1]
@@ -481,6 +326,163 @@ pop_trend <-function(pop_data){
 
 }
 
+
+# Summary of AOH changes to identify genuine changes
+
+# organise data
+# start from scratch so that this is standalone
+work_dir = "C:/Users/sb42kg/OneDrive - The Royal Botanic Gardens, Kew/01_Projects/SRLI_project/SRLI_2_paper/SRLI_2024_C_version/"
+
+# load relevant files
+SRLI_2026 <- read_csv(paste0(work_dir, "00_raw_data/SRLI_2026.csv")) %>%
+  dplyr::filter(SRLI_2024_analysis == "include")
+
+# load functions below #results summary etc.
+# single to test it is working
+powo_ID = "469774-1"
+sp_res <- read_csv(paste0(work_dir,"04_outputs/curated_workflow/aoh_stats/results_", powo_ID ,".csv"))
+sp_res <- read_csv(paste0(work_dir,"/04_outputs/gbif_workflow/aoh_stats/results_", powo_ID ,".csv"))
+
+# batch generate results
+# Read in the AOH results
+# GBIF first ----
+files <- list.files(path = paste0(work_dir, "04_outputs/gbif_workflow/aoh_stats/"),
+                    pattern="csv",
+                    all.files=FALSE,
+                    full.names=TRUE,
+                    recursive=TRUE)
+thefile = str_match(files, "results_(.*?).csv")
+results = thefile[,2]
+length(results)
+
+to_do <- results
+
+i = 1
+sp_res <- read_csv(paste0(work_dir,"04_outputs/gbif_workflow/aoh_stats/results_", to_do[i] ,".csv"))
+res = results_summary(sp_res)
+
+for (i in 2:length(to_do)){
+
+  sp_res <- read_csv(paste0(work_dir,"04_outputs/gbif_workflow/aoh_stats/results_", to_do[i] ,".csv"),
+                     col_types = cols()) # to suppress warnings
+  print(sp_res$powoID[i])
+  res_l = try(results_summary(sp_res)) #silent=TRUE
+  res = bind_rows(res, res_l)
+
+}
+
+# save
+gbif_res_all <- res
+#write_csv(gbif_res_all, paste0("04_outputs/all_gbif_possible_genuine_changes.csv"))
+
+# work out only the genuine possible changes i.e. LC, NT cancelled out by VU
+
+# filter to get the possible changes
+res_comb_gbif <- res %>%
+  dplyr::filter(gen_aoh_2000_2010_10yr == TRUE |
+                  gen_aoh_2010_2020_10yr == TRUE |
+                  gen_aoh_2000_2010_20yr == TRUE |
+                  gen_aoh_2010_2020_20yr == TRUE |
+                  gen_aoh_2000_2010_30yr == TRUE |
+                  gen_aoh_2010_2020_30yr == TRUE |
+                  gen_aoo_max_2000_2010== TRUE |
+                  gen_aoo_max_2010_2020 == TRUE |
+                  gen_eoo_max_2000_2010 == TRUE |
+                  gen_eoo_max_2010_2020 == TRUE
+                ) %>%
+  mutate(workflow = "gbif")
+
+
+# batch generate results
+# Read in the AOH results
+# Curated second ----
+files <- list.files(path = paste0(work_dir, "04_outputs/curated_workflow/aoh_stats/"),
+                    pattern="csv",
+                    all.files=FALSE,
+                    full.names=TRUE,
+                    recursive=TRUE)
+thefile = str_match(files, "results_(.*?).csv")
+results = thefile[,2]
+length(results)
+
+to_do <- results
+
+i = 1
+sp_res <- read_csv(paste0(work_dir,"04_outputs/curated_workflow/aoh_stats/results_", to_do[i] ,".csv"))
+res = results_summary(sp_res)
+
+for (i in 2:length(to_do)){
+
+  sp_res <- read_csv(paste0(work_dir,"04_outputs/curated_workflow/aoh_stats/results_", to_do[i] ,".csv"),
+                     col_types = cols()) # to suppress warnings
+  print(sp_res$powoID[i])
+  res_l = try(results_summary(sp_res)) #silent=TRUE
+  res = bind_rows(res, res_l)
+
+}
+
+# save
+curated_res_all <- res
+
+# work out only the genuine possible changes i.e. LC, NT cancelled out by VU
+
+# filter to get the possible changes
+res_comb_curated <- res %>%
+  dplyr::filter(gen_aoh_2000_2010_10yr == TRUE |
+                  gen_aoh_2010_2020_10yr == TRUE |
+                  gen_aoh_2000_2010_20yr == TRUE |
+                  gen_aoh_2010_2020_20yr == TRUE |
+                  gen_aoh_2000_2010_30yr == TRUE |
+                  gen_aoh_2010_2020_30yr == TRUE |
+                  gen_aoo_max_2000_2010== TRUE |
+                  gen_aoo_max_2010_2020 == TRUE |
+                  gen_eoo_max_2000_2010 == TRUE |
+                  gen_eoo_max_2010_2020 == TRUE
+                ) %>%
+  mutate(workflow = "curated")
+
+
+# summarise/combine  results
+res_comb <- bind_rows(res_comb_gbif, res_comb_curated)
+
+res_comb_true <- res_comb %>% dplyr::select("gen_eoo_max_2000_2010",
+                                            "gen_eoo_max_2010_2020",
+                                            "gen_aoo_max_2000_2010",
+                                            "gen_aoo_max_2010_2020",
+                                            "gen_aoh_2000_2010_30yr",
+                                            "gen_aoh_2010_2020_30yr",
+                                            "gen_aoh_2000_2010_20yr",
+                                            "gen_aoh_2010_2020_20yr",
+                                            "gen_aoh_2000_2010_10yr",
+                                            "gen_aoh_2010_2020_10yr"
+)
+
+
+
+# save as a table?
+# Summarise ----
+sum_res <- data.frame(
+  column = names(res_comb_true),
+  n_true = colSums(res_comb_true, na.rm = TRUE)
+)
+
+# how many species?
+res_comb_sp <- res_comb %>% group_by() %>% distinct(powo_ID) %>% count()
+
+# # join with SRLI to get 2020_ratings
+# SRLI_2024_thin <- SRLI_2024 %>% select(WCVP_current_id, RL_2000, RL_2010, RL_2020, WCVP_accepted_name)
+# res_comb_id <- res_comb %>% left_join(SRLI_2024_thin, by = c("powo_ID" = "WCVP_current_id"))
+# test <- res_comb_id %>% group_by(powo_ID) %>% count()
+# write_csv(res_comb_id, paste0("G:/Users/sb42kg/SRLI_2024/04_outputs/possible_genuine_changes_curated.csv"))
+# write_csv(res_comb_id, paste0("G:/Users/sb42kg/SRLI_2024/04_outputs/possible_genuine_changes_gbif.csv"))
+# #write_csv(res_comb_id, paste0("G:/Users/sb42kg/SRLI_2024/04_outputs/possible_genuine_changes.csv"))
+
+
+
+
+
+
+#
 
 
 ## explore possible chart to show majority change and maximum change

@@ -132,17 +132,21 @@ mean(log(wide_df$gbif) - log(wide_df$curated))
 exp(mean(log(wide_df$gbif) - log(wide_df$curated)))
 
 # density
-p_dens <- ggplot(comb_2020, aes(x = cell_count, fill = workflow)) +
+p_dens <- ggplot(comb_2020, aes(x = cell_count, fill = workflow, colour = workflow)) +
   geom_density(alpha = 0.5) +
   scale_x_log10(labels = scales::comma) +
   labs(x = "Range Size (cells)", y = "Density") +
+  scale_fill_manual(values = c("curated" = "#CC79A7", "gbif" = "#509E2F")) +
+  scale_color_manual(values = c("curated" = "#CC79A7", "gbif" = "#509E2F")) +
   theme_base(base_size = 14) +
   theme(
-    legend.background = element_blank(),
-    legend.box.background = element_blank(),
+    legend.position = "right",
     plot.background = element_blank(),
-    panel.background = element_rect(fill = "white", colour = NA)
+    panel.background = element_rect(fill = "white", colour = NA),
+    strip.background = element_rect(fill = "white", colour = "black", linewidth = 0.5)
   )
+
+p_dens
 
 # hex
 p_hex <- ggplot(wide_df, aes(x = curated, y = gbif)) +
@@ -165,6 +169,9 @@ coord_equal()
 getwd()
 
 (p_hex / p_dens)
+
+combo <- cowplot::plot_grid(p_hex, p_dens, labels = c('A', 'B'), nrow = 2)
+
 #ggsave(paste0(getwd(),"/02_figures/Figure_S3_GBIF_vs_Curated.png"), width = 6, height = 5)
-ggsave(paste0(getwd(),"/02_figures/Figure_S3_GBIF_vs_Curated.png"), width = 6, height = 10)
+ggsave(paste0(getwd(),"/02_figures/Figure_S3_GBIF_vs_Curated.png"), width = 6, height = 8)
 

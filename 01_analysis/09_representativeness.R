@@ -68,6 +68,12 @@ validated_sp <- comb_val %>%
 # extract accepted fabaceae only
 Fabaceae <- wcvp_acc %>%
   dplyr::filter(family == "Fabaceae")
+nrow(Fabaceae)
+
+# result X ----
+# proportion of WCVP that legumes represent
+legs_prop <- nrow(Fabaceae) / nrow(wcvp_acc) * 100
+print(paste0("Legs proportion = ", legs_prop))
 
 # get the species count per genera in Fabaceae
 wcvp_fab_genera = Fabaceae %>%
@@ -149,6 +155,11 @@ wcvp_mons_fams <- wcvp_mons |>
   group_by(family) %>%
   count()
 
+# result X ----
+# proportion of WCVP that legumes represent
+mons_prop <- nrow(wcvp_mons) / nrow(wcvp_acc) * 100
+print(paste0("Mons proportion = ", mons_prop))
+
 # get the count of monocot families in the sample
 srli_mons_included = SRLI_2026 %>%
   filter(group == "Monocots",
@@ -191,6 +202,11 @@ mons_fam_merge <- inner_join(mons_merged, wcvp_mons_fams, by = "family")
 mons_fam_merge <- mons_fam_merge %>%
   mutate(source = factor(source, levels = c("included_sample","assessed_sample", "validated", "red_list")))
 
+# write down the table
+write.csv(mons_fam_merge,
+          "02_figures/mons_fam_merged.csv",
+          row.names = FALSE)
+
 # plot
 mons <- ggplot(mons_fam_merge, aes(x = n.x, y = n.y, group = source, color = source)) +
   geom_point(aes(size = 3, fill = source, shape = source), color = "grey22", stroke = 0.2) +
@@ -208,7 +224,7 @@ mons <- ggplot(mons_fam_merge, aes(x = n.x, y = n.y, group = source, color = sou
        y = "Species per Monocot families in WCVP")
 mons
 
-#ggsave(("02_figures/Figure_S1_mons.png"),width = 20, height = 9, units = "cm")
+#ggsave(("02_figures/mons.png"),width = 20, height = 9, units = "cm")
 
 combo <- cowplot::plot_grid(legs, mons, labels = c('A', 'B'), nrow = 2)
 
@@ -591,3 +607,346 @@ residuals <- data.frame(
   arrange(desc(abs(residual)))
 
 head(residuals, 20)
+
+
+# Country count ----
+# We need the count of SRLI monocots and legumes per country
+# Then we group these up by bins of no. species e.g. 0-10, 11-20, 21-50
+# follow Tilla methodology
+# number of nations with at least X sampled species
+# combine monocots and legumes
+
+# mons ----
+tdwg_level3 <- readRDS(paste0(work_dir, "00_raw_data/tdwg_level3.rds"))
+SRLI_dists <- read_csv(paste0(work_dir, "00_raw_data/SRLI_dists.csv"))
+distributions <- rWCVPdata::wcvp_distributions
+
+# join names and distributions and filter to the accepted, native etc.
+dists <- wcvp_names %>% dplyr::select(plant_name_id,powo_id, taxon_name, taxon_status, taxon_rank) %>%
+  dplyr::left_join(distributions, by = "plant_name_id") %>%
+  dplyr::filter(complete.cases(plant_locality_id),
+                taxon_status == "Accepted",
+                taxon_rank == "Species",
+                location_doubtful == "0",
+                extinct == "0",
+                introduced == "0")
+
+# all monocots assessed - sample
+mons_geog_assesed <- SRLI_dists %>%
+  filter(group == "Monocots",
+         SRLI_2024_analysis == "include",
+         RL_2020 != "NE") %>%
+  group_by(area_code_l3) %>%
+  count() %>%
+  mutate(source = "assessed_mons")
+
+# Create the bins and count
+binned_mons <- mons_geog_assesed %>%
+  mutate(
+    n_bin = cut(n,
+                breaks = c(0, 10, 20, 40, 60, 80, 100, 200),
+                labels = c("1-10", "11-20", "21-40", "41-60", "61-80", "81-100", "101-200"),
+                right = TRUE)
+  ) %>%
+  group_by(n_bin) %>%
+  summarise(count = n(), .groups = 'drop')
+
+binned_mons
+
+ggplot(binned_mons, aes(x = n_bin, y = count)) +
+  geom_col(fill = "steelblue") +
+  labs(
+    title = "Distribution of area_code_l3 by n bins",
+    x = "n bins",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# legs
+# legumes - geog
+
+
+# all legumes assessed - sample
+legs_geog_assesed <- SRLI_dists %>%
+  filter(group == "Legumes",
+         SRLI_2024_analysis == "include",
+         RL_2020 != "NE") %>%
+  group_by(area_code_l3) %>%
+  count() %>%
+  mutate(source = "assessed_legs")
+
+# Create the bins and count
+binned_legs<- legs_geog_assesed %>%
+  mutate(
+    n_bin = cut(n,
+                breaks = c(0, 10, 20, 40, 60, 80, 100, 200),
+                labels = c("1-10", "11-20", "21-40", "41-60", "61-80", "81-100", "101-200"),
+                right = TRUE)
+  ) %>%
+  group_by(n_bin) %>%
+  summarise(count = n(), .groups = 'drop')
+
+binned_legs
+
+ggplot(binned_legs, aes(x = n_bin, y = count)) +
+  geom_col(fill = "orange") +
+  labs(
+    title = "Distribution of area_code_l3 by n bins",
+    x = "n bins",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# combined
+comb <- mons_geog_assesed %>% dplyr::left_join(legs_geog_assesed,
+                                               by = "area_code_l3")
+
+comb$count <- comb$n.x + comb$n.y
+
+# now plot a map to show count of samples per TDWG
+tdwg <- readRDS(paste0(work_dir, "00_raw_data/tdwg_level3.rds"))
+
+tdwg_mapped <- tdwg %>%
+  left_join(comb, by = c("LEVEL3_COD" = "area_code_l3"))
+
+# map it
+library(sf)
+library(ggplot2)
+
+# plotting defaults ----
+default_font_colour = "#22211d"
+default_font_family = "Arial"
+default_background_colour = "#f5f5f2"
+default_grid_colour = "#dbdbd9"
+default_caption_colour = "#939184"
+
+# Make valid first, THEN wrap dateline
+# Create binned variable
+tdwg_mapped <- tdwg_mapped %>%
+  mutate(count_bin = case_when(
+    is.na(count) ~ "No data",
+    count == 0 ~ "Zero",
+    count >= 1 & count <= 10 ~ "1-10",
+    count >= 11 & count <= 50 ~ "11-50",
+    count >= 51 & count <= 100 ~ "51-100",
+    count > 100 ~ ">100"
+  ) %>%
+  factor(levels = c("Zero", "1-10", "11-50", "51-100", ">100", "No data")))
+
+tdwg_mapped <- st_make_valid(tdwg_mapped)
+
+tdwg_mapped <- st_wrap_dateline(tdwg_mapped)
+
+tdwg_mapped_proj <- st_transform(tdwg_mapped, crs = "+proj=robin")
+
+# Plot with discrete colors
+ggplot(tdwg_mapped) +
+  geom_sf(aes(fill = count_bin)) +
+  scale_fill_manual(
+    name = "No. species",
+    values = c(
+      "Zero" = NA,
+      "1-10" = "#e6f7e6",
+      "11-50" = "#c7e9c0",
+      "51-100" = "#74c476",
+      ">100" = "#238b45",
+      "No data" = "#e8e8e8"
+    ),
+    na.value = "white"
+  ) +
+  coord_sf(crs = "+proj=robin", expand = FALSE) +
+  #labs(title = "Distribution of area_code_l3 by count") +
+  theme_map()
+
+# save it as Figure S6 G ----
+ggsave(("02_figures/Figure_S5_G_species_mapped.png"),width = 20, height = 8, units = "cm")
+
+
+# plotting defaults ----
+default_font_colour = "#22211d"
+#default_font_family = "Arial"  # Changed from "Franklin Gothic Demi"
+default_background_colour = "#f5f5f2"
+default_grid_colour = "#dbdbd9"
+default_caption_colour = "#939184"
+
+
+# themes ----
+
+#' A (hopefully) nice looking theme for maps, derived from
+#' https://timogrossenbacher.ch/2016/12/beautiful-thematic-maps-with-ggplot2-only/
+theme_map <- function(...) {
+  theme_minimal() +
+    theme(
+      #text=element_text(family=default_font_family,
+      #                  colour=default_font_colour),
+      # remove axes
+      axis.line=element_blank(),
+      axis.text.x=element_blank(),
+      axis.text.y=element_blank(),
+      axis.ticks=element_blank(),
+      # put in a subtle grid
+      panel.grid.major=element_line(colour=default_grid_colour, size=0.2),
+      panel.grid.minor=element_blank(),
+      # shade background
+      plot.background=element_rect(fill=default_background_colour, colour=NA),
+      panel.background=element_rect(fill=default_background_colour, colour=NA),
+      legend.background=element_rect(fill=default_background_colour, colour=NA),
+      panel.border=element_blank(),
+      # set margins
+      plot.margin=unit(c(0.5, 0.5, 0.2, 0.5), "cm"),
+      panel.spacing=unit(c(-0.1, 0.2, 0.2, 0.2), "cm"),
+      # define specific text settings
+      legend.title=element_text(size=11),
+      legend.text=element_text(size=9, hjust=0, colour=default_font_colour),
+      plot.title=element_text(size=15, hjust=0, colour=default_font_colour),
+      plot.subtitle=element_text(size=10, hjust=0.5, colour=default_font_colour,
+                                 margin=margin(b=-0.1, t=-0.1, l=2, unit="cm"),
+                                 debug=FALSE),
+
+      plot.caption=element_text(size=7, hjust=0.5, margin=margin(t=0.2, b=0, unit="cm"),
+                                color=default_caption_colour),
+      ...
+    )
+}
+
+# guides ----
+
+#' a guide to make a nice legend for a discrete choropleth
+guide_map <- function(...) {
+  guide_legend(
+    direction="horizontal",
+    keyheight=unit(4, units="mm"),
+    keywidth=unit(10, units="mm"),
+    label.hjust=1,
+    title.position="top",
+    nrow=1,
+    byrow=TRUE,
+    label.position="bottom",
+    ...
+  )
+}
+
+# calculations ----
+
+#' a handy function for splitting a continuous variable into bins
+bin_data <- function(continuous_data, breaks=7, break_label_expr="(?<=\\,).+(?=\\])") {
+
+  if (length(breaks) == 1) {
+    break_min <- min(continuous_data, na.rm=TRUE)
+    break_max <- max(continuous_data, na.rm=TRUE)
+
+    break_min <- break_min - break_min * 0.5
+
+    breaks <- seq(from=break_min, to=break_max, length.out=breaks)
+  }
+
+  discrete_data <- cut(continuous_data, breaks=breaks,
+                       include.lowest=TRUE, ordered_result=TRUE)
+
+  discrete_data <- forcats::fct_relabel(discrete_data,
+                                        ~stringr::str_extract(.x, break_label_expr))
+}
+
+#' a handy function for making an outline or mask of the goode map projection
+#' adapted from https://wilkelab.org/practicalgg/articles/goode.html
+goode_outline <- function(mask=FALSE) {
+  lats <- c(
+    90:-90,
+    -90:0, 0:-90,
+    -90:0, 0:-90,
+    -90:0, 0:-90,
+    -90:90,
+    90:0, 0:90,
+    90
+  )
+
+  longs <- c(
+    rep(180, 181),
+    rep(c(80.01, 79.99), each=91),
+    rep(c(-19.99, -20.01), each=91),
+    rep(c(-99.99, -100.01), each=91),
+    rep(-180, 181),
+    rep(c(-40.01, -39.99), each=91),
+    180
+  )
+
+  outline <-
+    list(cbind(longs, lats)) %>%
+    sf::st_polygon() %>%
+    sf::st_sfc(
+      crs="+proj=longlat +ellps=WGS84 +no_defs"
+    )
+
+  if (mask) {
+    outline <- sf::st_transform(outline, crs="+proj=igh")
+
+    xlim <- sf::st_bbox(outline)[c("xmin", "xmax")]*1.1
+    ylim <- sf::st_bbox(outline)[c("ymin", "ymax")]*1.1
+
+    rectangle <- list(
+      cbind(
+        c(xlim[1], xlim[2], xlim[2], xlim[1], xlim[1]),
+        c(ylim[1], ylim[1], ylim[2], ylim[2], ylim[1])
+      )
+    )
+
+    rectangle <-
+      rectangle %>%
+      sf::st_polygon() %>%
+      sf::st_sfc(crs="+proj=igh")
+
+    outline <- sf::st_difference(rectangle, outline)
+  }
+
+  outline
+}
+
+# plots ----
+
+plot_funnel <- function(.data, success_var, total_var, colour_var=NULL, label_var=NULL) {
+  success_var <- enquo(success_var)
+  total_var <- enquo(total_var)
+  colour_var <- enquo(colour_var)
+  label_var <- enquo(label_var)
+
+  successes <- pull(.data, !! success_var)
+  totals <- pull(.data, !! total_var)
+
+  funnel <- tibble(mean=sum(successes) / sum(totals),
+                   !! total_var :=seq(min(totals), max(totals), 1))
+
+  funnel <- mutate(funnel, std_err=sqrt(mean * (1 - mean) / !! total_var))
+
+  if (rlang::quo_is_null(colour_var)) {
+    p <-
+      .data %>%
+      mutate(p= !! success_var / !! total_var) %>%
+      ggplot(mapping=aes(x=!! total_var, y=p)) +
+      geom_point(color="#a9a9a9")
+  } else {
+    p <-
+      .data %>%
+      mutate(p= !! success_var / !! total_var) %>%
+      ggplot(mapping=aes(x=!! total_var, y=p)) +
+      geom_point(mapping=aes(colour=!! colour_var))
+  }
+
+
+  p <-
+    p +
+    geom_line(data=funnel, mapping=aes(y=mean), colour="#000000") +
+    geom_line(data=funnel, mapping=aes(y=mean - 1.96*std_err), colour="#bb2a34", linetype=2) +
+    geom_line(data=funnel, mapping=aes(y=mean + 1.96*std_err), colour="#2870b1", linetype=2) +
+    geom_line(data=funnel, mapping=aes(y=mean - 3*std_err), colour="#bb2a34", linetype=3) +
+    geom_line(data=funnel, mapping=aes(y=mean + 3*std_err), colour="#2870b1", linetype=3)
+
+  if (! rlang::quo_is_null(label_var)) {
+    p <-
+      p +
+      geom_text_repel(mapping=aes(colour=!! colour_var, label=!! label_var, y=p), force=2)
+  }
+
+  p
+}

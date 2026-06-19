@@ -14,8 +14,11 @@ source("01_analysis/03_threat_proportion.R") # Figure 1, Tables S2,S3
 source("01_analysis/04_category_changes.R") # Table 1, Figure 2 (A,B,C,D), Tables S4,S5
 source("01_analysis/05_RLI_trend_lines.R") #Figure 3, Tables S6
 source("01_analysis/06_compare_curated_gbif_aoh.R") #Figure S3
-source("01_analysis/07_aoh_validation_results.R") #Figure 4, Table_S7, Figure S4. Figure S5
+source("01_analysis/07_aoh_validation_results.R") #Figure 4, Table_S7, S8, S9, Figure S4,S5
+source("01_analysis/08_aoh_metrics_summary.R") # no figure or table
 source("01_analysis/09_representativeness.R") #Figure S6
+source("01_analysis/10_compare_RSFDs.R") #Figure S7, Table_S10
+source("01_analysis/11_new_species.R")
 
 # generate the supplementary tables - excel
 data_coverage_summary <- read.csv("02_figures/Table_S1_data_coverage_summary.csv")
@@ -28,6 +31,7 @@ RLI_values <- read.csv("02_figures/Table_S6_rli_values.csv")
 validation_tests <- read.csv("02_figures/Table_S7_validation_tests.csv")
 validation_summary <- read.csv("02_figures/Table_S8_validation_summary.csv")
 validation_accuracy <- read.csv("02_figures/Table_S9_validation_accuracy.csv")
+rsfds <- read.csv("02_figures/Table_S10_rsfds.csv")
 
 # write as an excel file with tabs for each table
 write_xlsx(
@@ -39,6 +43,7 @@ write_xlsx(
   "S6_RLI_values.csv" = RLI_values,
   "S7_validation_tests" = validation_tests,
   "S8_validation_summary" = validation_summary,
-  "S9_validation_accuracy.csv" = validation_accuracy
+  "S9_validation_accuracy.csv" = validation_accuracy,
+  "s10_rsfds.csv" = rsfds
   ),
   "02_figures/Supplementary_tables.xlsx")
